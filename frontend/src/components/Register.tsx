@@ -10,18 +10,34 @@ import { motion } from "framer-motion";
 
 export default function Register() {
 
-  const [imageFile, setImageFile] = useState(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [imageUpload, setImageUpload] = useState();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log("Form submitted");
+  const handleImageUpload = (e : any) => {
+    setImageUpload(e.target.files[0]);
   };
 
-  const handleImageUpload = (event : any) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImageFile(file);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('email', email);
+    
+    if (imageUpload) {
+      formData.append('imageUpload', imageUpload);
     }
+  
+    const response = await fetch('api/register/', {
+      method: 'POST',
+      body: formData,
+    });
+  
+    const data = await response.json();
+    console.log(data);
   };
 
   return (
@@ -38,11 +54,10 @@ export default function Register() {
       >
         <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
       <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
-        Welcome to Aceternity
+        Welcome
       </h2>
       <p className="text-neutral-600 text-sm max-w-sm mt-2 dark:text-neutral-300">
-        Login to aceternity if you can because we don&apos;t have a login flow
-        yet
+        Register
       </p>
 
       <form className="my-8" onSubmit={handleSubmit}>
@@ -61,12 +76,12 @@ export default function Register() {
           <Input id="email" placeholder="projectmayhem@fc.com" type="email" />
         </LabelInputContainer>
         <LabelInputContainer className="mb-4">
-          <Label htmlFor="imageUpload">Take a photo with your camera</Label>
+          <Label htmlFor="imageUpload">Register your face</Label>
           <Input
             id="imageUpload"
             type="file"
             accept="image/*"
-            capture="environment" // This attribute prompts devices to use the camera
+            capture="user"
             onChange={handleImageUpload}
           />
         </LabelInputContainer>
