@@ -43,11 +43,15 @@ def register(request):
 
 @api_view(['POST'])
 def login(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+    Users = get_user_model()
     
+    email = request.data.get('email')
+    image_mem = request.data.get('imageUpload')
     
-    user = authenticate(username=username, password=None)
+    user = Users.objects.filter(email = email).first()
+
+    ## TODO: Implement auth here
+    print(user.email)
     
     if user is None:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)

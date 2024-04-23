@@ -4,7 +4,7 @@ import './index.css';
 
 import Home from './components/Home.js';
 import Register from './components/Register';
-import Login from './components/Login.js';
+import Login from './components/Login';
 import User from './components/User.js';
 
 import reportWebVitals from './reportWebVitals';
