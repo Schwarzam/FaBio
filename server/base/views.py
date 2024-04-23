@@ -22,25 +22,23 @@ def register(request):
     first_name = request.data.get('firstName')
     last_name = request.data.get('lastName')
     email = request.data.get('email')
-    # Get the image from the request data
     image_mem = request.data.get('imageUpload')
 
-    # Open the image file and convert it to a numpy array
-    image = Image.open(io.BytesIO(image_mem.read()))
-    image = np.array(image)
-    
-    # TODO: Implement database
     if Users.objects.filter(email=email).exists():
         return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
+    
+    image = Image.open(io.BytesIO(image_mem.read()))
 
-    user = Users.objects.create_user(email=email, username=first_name, password=None)
+    user = Users.objects.create_user(email=email, username=first_name)
+    user.face_image.save(f'{user.username}_face.jpg', image_mem)
+    user.save()
     
     refresh = RefreshToken.for_user(user)
     return Response({
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     })
-
+    
 @api_view(['POST'])
 def login(request):
     Users = get_user_model()
@@ -52,6 +50,11 @@ def login(request):
 
     ## TODO: Implement auth here
     print(user.email)
+    # Open the image file and convert it to a numpy array
+    image = Image.open(io.BytesIO(image_mem.read()))
+    image = np.array(image)
+    
+    print(image)
     
     if user is None:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
