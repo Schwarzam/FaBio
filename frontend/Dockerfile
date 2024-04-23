@@ -7,7 +7,7 @@
 # CMD [ "npm", "start" ]
 
 # HACK: [For production]
-FROM node:20
+FROM node:lts-alpine3.19
  
 WORKDIR /frontend
 

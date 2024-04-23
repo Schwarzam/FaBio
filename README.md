@@ -19,3 +19,24 @@ chewbaccanik@gmail.com
 Leonardo Nagase Haga - Engenharia Produção Vespertino <br>
 TA: 32456913 <br>
 leohaga@hotmail.com
+
+
+### Running
+
+docker-compose build
+docker-compose up -d
+docker-compose exec server python manage.py migrate --noinput
+
+### Development
+
+Run the docker compose.
+```bash
+sudo docker-compose up
+```
+
+
+Run frontend
+```bash
+cd frontend
+npm start
+```
