@@ -9,6 +9,7 @@ services:
       - ./frontend:/frontend
     environment:
       - CHOKIDAR_USEPOLLING=true
+
   server:
     build: ./server
     command: python manage.py runserver 0.0.0.0:8000
