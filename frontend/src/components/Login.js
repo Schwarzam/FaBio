@@ -13,16 +13,11 @@ export default function Register() {
     const [canvasSize, setCanvasSize] = useState({ width: 360, height: 360 });
 
     const [email, setEmail] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [something, setSomething] = useState('');
 
     const [showVideo, setShowVideo] = useState(false);
     const [captureFrameInterval, setCaptureFrameInterval] = useState(null);
      
     const [regToken, setRegToken] = useState(null);
-
-    const navigate = useNavigate();
 
     const steps = ['straight', 'left', 'right', 'take'];
     const steps_messages = [
@@ -35,11 +30,15 @@ export default function Register() {
     const [currentStep, setCurrentStep] = useState(0);
     const currentStepRef = useRef(currentStep);
 
+    const navigate = useNavigate();
+
     const ledStates = [
         'bg-yellow-500',
         'bg-green-500',
     ]
     const [ledState, setLedState] = useState(0);
+       
+
     useEffect(() => {
         async function setupVideo() {
             try {
@@ -68,6 +67,10 @@ export default function Register() {
         };
     }, []);
 
+    const handleShowVideoButton = () => {
+        setShowVideo(true);
+    };
+
     const register = async () => {
         if (!videoRef.current) return;
 
@@ -84,19 +87,16 @@ export default function Register() {
             if (blob) {
                 blob.arrayBuffer().then(buffer => {
                     console.log(localStorage.getItem('regtoken'))
-                    const formData = new FormData();
+                    var formData = new FormData();
                     formData.append('imageUpload', new Blob([buffer], { type: 'image/jpeg' }), 'image.jpg');
                     formData.append('email', email);
-                    formData.append('first_name', firstName);
-                    formData.append('last_name', lastName);
-                    formData.append('something', something);
                     formData.append('token', regToken);
 
-                    post('/api/register/', formData)
-                        .then(data => {
-                            console.log(data)
-                            data['message'] === 'User created successfully' ? navigate('/login') : console.log(data['message'])
-                            
+                    post('/api/login/', formData)
+                        .then(response => {
+                            if (response['message'][0]) {
+                                navigate('/user')
+                            }
                         })
                         .catch(error => {
                             console.error(error);
@@ -118,7 +118,7 @@ export default function Register() {
     const handleInputChange = (e, setInput) => {
         setInput(e.target.value);
     
-        if (firstName && lastName && email) {
+        if (email) {
             if (captureFrameInterval === null){
                 startCaptureInterval();
             }
@@ -196,28 +196,13 @@ export default function Register() {
               }}
               className="relative flex flex-col gap-4 items-center justify-center px-4 bg-gray-100 dark:bg-[#201c1c]"
           >
-              <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white dark:bg-[#201c1c]">
-                <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
-                    <LabelInputContainer>
-                        <Label htmlFor="firstname">First name</Label>
-                        <Input id="firstname" placeholder="Vincas" type="text" onChange={(e) => handleInputChange(e, setFirstName)} />
-                    </LabelInputContainer>
-                    <LabelInputContainer>
-                        <Label htmlFor="lastname">Last name</Label>
-                        <Input id="lastname" placeholder="Oliveira" type="text" onChange={(e) => handleInputChange(e, setLastName)} />
-                    </LabelInputContainer>
-                    </div>
+              <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white bg-white dark:bg-black">
+
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
                       <Input id="email" placeholder="projectmayhem@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
                   </LabelInputContainer>
 
-                    <LabelInputContainer className="mb-4">
-                        <Label htmlFor="something">Something about you</Label>
-                        <Input id="something" placeholder="Corinthians" type="something" onChange={(e) => handleInputChange(e, setSomething)} />
-                    </LabelInputContainer>
-                    
-                    
                     <p className={`bg-gray-300 text-center p-4 border rounded-2xl mt-10 text-black dark:text-black border-neutral-200 dark:border-gray-200`}>
                         {steps_messages[currentStep]}
                     </p>

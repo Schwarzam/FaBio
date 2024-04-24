@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 
 import Home from './components/Home.js';
-import Register from './components/Register';
-import Login from './components/Login';
+import Register from './components/Register.js';
+import Login from './components/Login.js';
 import User from './components/User.js';
 
 import reportWebVitals from './reportWebVitals';

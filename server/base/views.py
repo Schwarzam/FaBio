@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Tokens
+from .models import Tokens, MyUser
 from .helpers import turn_left_detection, turn_right_detection, verify_number_faces
 
 from django.contrib.auth import get_user_model
@@ -16,66 +16,67 @@ import numpy as np
 import io
 import secrets
 
+import face_recognition
+
+
+
 tokens = []
 
 @api_view(['POST'])
 def register(request):
     Users = get_user_model()
     
-    print(request.data)
-    
-    first_name = request.data.get('firstName')
-    last_name = request.data.get('lastName')
+    first_name = request.data.get('first_name')
+    last_name = request.data.get('last_name')
     email = request.data.get('email')
     image_mem = request.data.get('imageUpload')
     token = request.data.get('token')
     
-    print("ALL", Tokens.objects.all(), Tokens.objects.filter(token=token).first())
-    if Tokens.objects.filter(token=token).first() is None:
+    token = Tokens.objects.filter(token=token).first()
+    if token is None:
         return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    # if Users.objects.filter(email=email).exists():
-    #     return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
+    else:
+        ## Remove token from tokens
+        token.delete()
+    
+    if Users.objects.filter(email=email).exists():
+        return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
     
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
-    print(image.shape)
-
-    user = Users.objects.create_user(email=email, username=first_name)
-    user.face_image.save(f'{user.username}_face.jpg', image_mem)
+    
+    face_encoding = face_recognition.face_encodings(image)[0]
+    
+    user = MyUser.objects.create(email=email, first_name=first_name, last_name=last_name)
+    user.face_encoding_array = face_encoding.tobytes()
     user.save()
     
-    refresh = RefreshToken.for_user(user)
-    return Response({
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    })
+    return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
     
 @api_view(['POST'])
 def login(request):
-    Users = get_user_model()
-    
     email = request.data.get('email')
+    
+    user = MyUser.objects.filter(email=email).first()
+    
+    if user is None:
+        return Response({'error': 'Email is not registered'}, status=status.HTTP_401_UNAUTHORIZED)
+    
     image_mem = request.data.get('imageUpload')
     
-    user = Users.objects.filter(email = email).first()
-
-    ## TODO: Implement auth here
-    print(user.email)
     # Open the image file and convert it to a numpy array
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    print(image)
+    encoding = face_recognition.face_encodings(image)[0]
     
-    if user is None:
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    refresh = RefreshToken.for_user(user)
-    return Response({
-        'refresh': str(refresh),
-        'access': str(refresh.access_token),
-    })
+    # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
+    face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
+    
+    result = face_recognition.compare_faces([face_encoding], encoding)
+    print(result)
+    
+    return Response({'message': result})
     
 
 @api_view(['POST'])

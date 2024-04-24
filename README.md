@@ -25,7 +25,7 @@ leohaga@hotmail.com
 
 docker-compose build
 docker-compose up -d
-docker-compose exec server python manage.py migrate --noinput
+docker-compose exec server python3 manage.py migrate --noinput
 
 ### Development
 
