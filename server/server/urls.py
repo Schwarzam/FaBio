@@ -26,5 +26,6 @@ urlpatterns = [
     path('api/login/', views.login, name='login'),
     
     path('api/test_side_face/', views.test_side_face, name='test_side_face'),
+    path('api/whoami/', views.whoami, name='whoami'),
     
 ]

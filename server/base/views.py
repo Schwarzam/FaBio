@@ -28,6 +28,8 @@ def register(request):
     last_name = request.data.get('last_name')
     something = request.data.get('something')
     email = request.data.get('email')
+    email = email.lower()
+    
     image_mem = request.data.get('imageUpload')
     token = request.data.get('token')
     
@@ -58,6 +60,7 @@ def register(request):
 @api_view(['POST'])
 def login(request):
     email = request.data.get('email')
+    email = email.lower()
     
     user = MyUser.objects.filter(email=email).first()
     
@@ -83,6 +86,35 @@ def login(request):
         return Response({'error': 'Face does not match'}, status=status.HTTP_401_UNAUTHORIZED)
     
     return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
+
+@api_view(['POST'])
+def whoami(request):
+    
+    image_mem = request.data.get('imageUpload')
+    
+    # Open the image file and convert it to a numpy array
+    image = Image.open(io.BytesIO(image_mem.read()))
+    image = np.array(image)
+    
+    try:
+        encoding = face_recognition.face_encodings(image)[0]
+    except:
+        return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
+        
+            
+    users = MyUser.objects.filter().all()
+    for user in users:
+        # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
+        face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
+        
+        if len(face_encoding) == 0:
+            continue
+        
+        result = face_recognition.compare_faces([face_encoding], encoding)
+        if result[0]:        
+            return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
+    
+    return Response({'error': 'Face does not match any on database'}, status=status.HTTP_401_UNAUTHORIZED)
     
 
 @api_view(['POST'])
@@ -113,7 +145,6 @@ def test_side_face(request):
     elif direction == 'take':
         token = secrets.token_urlsafe(12)
         Tokens.objects.create(token=token)
-        
         
         n = verify_number_faces(image)
         if n == 1:

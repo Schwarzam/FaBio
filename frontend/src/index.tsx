@@ -12,6 +12,8 @@ import reportWebVitals from './reportWebVitals';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import Whoami from './components/Whoami.js';
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -35,6 +37,10 @@ const router = createBrowserRouter([
     path: "/user",
     element: <User />,
   },
+  {
+    path: "/whoami",
+    element: <Whoami />,
+  }
 ]);
 
 
