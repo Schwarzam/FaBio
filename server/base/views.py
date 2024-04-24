@@ -7,12 +7,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .models import Tokens
 from .helpers import turn_left_detection, turn_right_detection, verify_number_faces
 
 from django.contrib.auth import get_user_model
 
 import numpy as np
 import io
+import secrets
+
+tokens = []
 
 @api_view(['POST'])
 def register(request):
@@ -24,11 +28,18 @@ def register(request):
     last_name = request.data.get('lastName')
     email = request.data.get('email')
     image_mem = request.data.get('imageUpload')
+    token = request.data.get('token')
+    
+    print("ALL", Tokens.objects.all(), Tokens.objects.filter(token=token).first())
+    if Tokens.objects.filter(token=token).first() is None:
+        return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if Users.objects.filter(email=email).exists():
-        return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
+    # if Users.objects.filter(email=email).exists():
+    #     return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
     
     image = Image.open(io.BytesIO(image_mem.read()))
+    image = np.array(image)
+    print(image.shape)
 
     user = Users.objects.create_user(email=email, username=first_name)
     user.face_image.save(f'{user.username}_face.jpg', image_mem)
@@ -69,9 +80,6 @@ def login(request):
 
 @api_view(['POST'])
 def test_side_face(request):
-    
-    print(request.data)
-    
     email = request.data.get('email')
     image_mem = request.data.get('imageUpload')
     direction = request.data.get('direction')
@@ -87,11 +95,22 @@ def test_side_face(request):
         response = turn_right_detection(image)
         return Response({'correct': response})
     elif direction == 'straight':
-        ## TODO: Add straight face detection
-        
+        ## Append random token to tokens
+        ## Return token to client
         n = verify_number_faces(image)
         if n == 1:
             return Response({'correct': True})
+        else:
+            return Response({'message': "Make sure your face is in the center of the frame and is not obstructed by anything."})
+    
+    elif direction == 'take':
+        token = secrets.token_urlsafe(12)
+        Tokens.objects.create(token=token)
+        
+        
+        n = verify_number_faces(image)
+        if n == 1:
+            return Response({'correct': True, 'token': token})
         else:
             return Response({'message': "Make sure your face is in the center of the frame and is not obstructed by anything."})
     
