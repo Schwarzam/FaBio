@@ -50,19 +50,29 @@ function Home() {
         }}
         className="relative flex flex-col gap-4 items-center justify-center px-4"
       >
+        <div className='pt-12'>
+              <button onClick={() => navigate("/")} className='dark:text-white border p-4 rounded-xl'>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                  </svg>
+              </button>
+          </div>
         
-        <div className="text-xl font-bold dark:text-white text-center select-none">
+        <div className="text-2xl font-bold dark:text-white text-center select-none">
           welcome
         </div>
         <div className="text-md font-bold dark:text-white text-center select-none">
-          you are authenticated as 
+          authenticated as {elements['last_name'] && elements['last_name']}, {elements['first_name'] && elements['first_name']}
+        </div>
+
+        <div className="text-md dark:text-white text-center select-none">
+          {elements['email'] && elements['email']}
         </div>
 
         <div className="text-md font-bold dark:text-white text-center select-none">
-          {elements['last_name'] && elements['last_name']}, {elements['first_name'] && elements['first_name']}
+          Don't worry, we have your secret well kept.
         </div>
-
-        <div className="text-lg font-bold dark:text-white text-center select-none">
+        <div className="text-sm border p-4 rounded-lg font-bold dark:text-white text-center select-none">
           {elements['something'] && elements['something']}
         </div>
 

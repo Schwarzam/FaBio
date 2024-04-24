@@ -9,6 +9,7 @@ import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
 
 import { clear_elements, set_elements } from './helpers/helpers';
+import { toast } from 'react-toastify';
 
 export default function Register() {
     const videoRef = useRef(null);
@@ -24,8 +25,8 @@ export default function Register() {
     const steps = ['straight', 'left', 'right', 'take'];
     const steps_messages = [
       'Please look straight and center your face.', 
-      'Please look to the left.', 
       'Please look to the right.', 
+      'Please look to the left.', 
       'Please look straight and center your face.',
       'You completed all steps!'
     ];
@@ -37,9 +38,10 @@ export default function Register() {
     const ledStates = [
         'bg-yellow-500',
         'bg-green-500',
+        'bg-red-500'
     ]
     const [ledState, setLedState] = useState(0);
-       
+    const ledStateRef = useRef(ledState);
 
     useEffect(() => {
         async function setupVideo() {
@@ -61,6 +63,9 @@ export default function Register() {
             setCanvasSize({ width: maxWidth, height: maxHeight });
         }
 
+        clear_elements();
+        toast("Fill the email field to login", { type: 'info' })
+
         window.addEventListener('resize', updateCanvasSize);
         updateCanvasSize();
 
@@ -68,14 +73,14 @@ export default function Register() {
             window.removeEventListener('resize', updateCanvasSize);
         };
 
-        clear_elements();
+        
     }, []);
 
     const handleShowVideoButton = () => {
         setShowVideo(true);
     };
 
-    const register = async () => {
+    const login = async () => {
         if (!videoRef.current) return;
 
         const canvas = document.createElement('canvas');
@@ -98,6 +103,21 @@ export default function Register() {
 
                     post('/api/login/', formData)
                         .then(response => {
+                            if (response['error']) {
+                                toast.error(response['error']);
+                                if (response['error'] === "Face does not match"){
+                                    console.log('setting led state to 2')
+                                    setLedState(2);
+                                    cancelTimeout();
+                                }
+
+                                if (response['redo']){
+                                    const stepIndex = steps.indexOf(response['redo']);
+                                    setCurrentStep(stepIndex);
+                                    startCaptureInterval(2000);
+                                }
+                            }
+
                             if (response['message'][0]) {
                                 set_elements(
                                     response['first_name'],
@@ -106,19 +126,21 @@ export default function Register() {
                                     response['something'],
                                 )
 
+                                toast.success('Welcome back!');
                                 navigate('/user')
                             }
                         })
                         .catch(error => {
-                            console.error(error);
+                            toast.error(error);
+                            console.log(error);
                         });
                 });
             }
         }, 'image/jpeg');
     };
 
-    const startCaptureInterval = () => {
-        setCaptureFrameInterval(setInterval(captureFrame, 1000));
+    const startCaptureInterval = (interval = 1000) => {
+        setCaptureFrameInterval(setInterval(captureFrame, interval));
     }
 
     const stopCaptureInterval = () => {
@@ -128,12 +150,12 @@ export default function Register() {
 
     const handleInputChange = (e, setInput) => {
         setInput(e.target.value);
+        setCurrentStep(0);
     
-        if (email) {
+        if (email && email.length > 1) {
             if (captureFrameInterval === null){
                 startCaptureInterval();
             }
-            
         }
     }; 
 
@@ -143,17 +165,29 @@ export default function Register() {
 
         if (currentStep === steps.length) {
             stopCaptureInterval();
-            register();
+            login();
         }
         
     }, [currentStep]);
 
+    let timeoutID = null;
     // I want to set a interval that will set the ledState to 1 for 1 second and then back to 0
     const setGreen = () => {
         setLedState(1);
-        setTimeout(() => {
+        timeoutID = setTimeout(() => {
+            
+            if (ledStateRef.current === 2){
+                return
+            }
             setLedState(0);
-        }, 2000);
+
+        }, 1500);
+    }
+
+    const cancelTimeout = () => {
+        if (timeoutID) {
+          clearTimeout(timeoutID); // Cancel the timeout
+        }
     }
 
     const captureFrame = async () => {
@@ -207,8 +241,15 @@ export default function Register() {
               }}
               className="relative flex flex-col gap-4 items-center justify-center px-4 bg-gray-100 dark:bg-[#201c1c]"
           >
+            <div className='pt-12'>
+                <button onClick={() => navigate("/")} className='dark:text-white border p-4 rounded-xl'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                </button>
+            </div>
             
-              <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white bg-white dark:bg-black">
+              <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white dark:bg-[#201c1c]">
               <p className='pb-8 font-bold text-lg'>Login</p>
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
@@ -221,7 +262,7 @@ export default function Register() {
                     
                     <div className='relative md:min-h-[1000px] mt-4'>
                         <div className={`${ledStates[ledState]} p-2 absolute rounded-[500px]`}>
-                            <video className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
+                            <video style={{"transform": "scaleX(-1)"}} className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
                         </div>
                     </div>
                   

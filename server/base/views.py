@@ -44,7 +44,10 @@ def register(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    face_encoding = face_recognition.face_encodings(image)[0]
+    try:
+        face_encoding = face_recognition.face_encodings(image)[0]
+    except:
+        return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
     
     user = MyUser.objects.create(email=email, first_name=first_name, last_name=last_name, something=something)
     user.face_encoding_array = face_encoding.tobytes()
@@ -67,13 +70,17 @@ def login(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    print(image)
-    encoding = face_recognition.face_encodings(image)[0]
-    
+    try:
+        encoding = face_recognition.face_encodings(image)[0]
+    except:
+        return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
+        
     # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
     face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
     
     result = face_recognition.compare_faces([face_encoding], encoding)
+    if not result[0]:
+        return Response({'error': 'Face does not match'}, status=status.HTTP_401_UNAUTHORIZED)
     
     return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
     

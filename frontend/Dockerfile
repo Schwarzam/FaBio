@@ -9,7 +9,9 @@
 # HACK: [For production]
 FROM node:lts-alpine3.19
  
+
 WORKDIR /frontend
+RUN rm -rf ./*
 
 COPY . .
 RUN npm i

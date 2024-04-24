@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 
+import { toast } from 'react-toastify';
 
 function Home() {
 
@@ -21,6 +22,8 @@ function Home() {
       document.documentElement.classList.remove('dark')
       setIsDark(false);
     }
+
+    // toast.success('Welcome to the Facial Recognition Test App!');
   }, []);
 
   const toggleDark = () => {

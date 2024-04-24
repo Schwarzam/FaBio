@@ -7,6 +7,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function Register() {
     const videoRef = useRef(null);
@@ -27,8 +28,8 @@ export default function Register() {
     const steps = ['straight', 'left', 'right', 'take'];
     const steps_messages = [
       'Please look straight and center your face.', 
-      'Please look to the left.', 
       'Please look to the right.', 
+      'Please look to the left.', 
       'Please look straight and center your face.',
       'You completed all steps!'
     ];
@@ -38,6 +39,7 @@ export default function Register() {
     const ledStates = [
         'bg-yellow-500',
         'bg-green-500',
+        'bg-red-500'
     ]
     const [ledState, setLedState] = useState(0);
     useEffect(() => {
@@ -62,6 +64,8 @@ export default function Register() {
 
         window.addEventListener('resize', updateCanvasSize);
         updateCanvasSize();
+
+        toast("Fill the fields to register", { type: 'info' })
 
         return () => {
             window.removeEventListener('resize', updateCanvasSize);
@@ -94,12 +98,23 @@ export default function Register() {
 
                     post('/api/register/', formData)
                         .then(data => {
-                            console.log(data)
+                            if (data['error']) {
+                                toast.error(data['error']);
+                                if (data['redo']){
+                                    const stepIndex = steps.indexOf(data['redo']);
+                                    setCurrentStep(stepIndex);
+                                    startCaptureInterval(2000);
+                                }
+                            }
+
+                            toast.success(data['message']);
                             data['message'] === 'User created successfully' ? navigate('/login') : console.log(data['message'])
                             
                         })
                         .catch(error => {
-                            console.error(error);
+                            toast.error(error);
+                            setLedState(2);
+                            console.log(error)
                         });
                 });
             }
@@ -117,12 +132,12 @@ export default function Register() {
 
     const handleInputChange = (e, setInput) => {
         setInput(e.target.value);
-    
+        setCurrentStep(0);
+
         if (firstName && lastName && email) {
             if (captureFrameInterval === null){
                 startCaptureInterval();
             }
-            
         }
     }; 
 
@@ -153,6 +168,7 @@ export default function Register() {
         canvas.height = canvasSize.height;
 
         const ctx = canvas.getContext('2d');
+
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
         canvas.toBlob(blob => {
@@ -174,7 +190,6 @@ export default function Register() {
                                 const nextStep = currentStepRef.current + 1;
                                 setCurrentStep(nextStep);
                             }
-                            
 
                         })
                         .catch(error => {
@@ -196,8 +211,15 @@ export default function Register() {
               }}
               className="relative flex flex-col gap-4 items-center justify-center px-4 bg-gray-100 dark:bg-[#201c1c]"
           >
+            <div className='pt-12'>
+                <button onClick={() => navigate("/")} className='dark:text-white border p-4 rounded-xl'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                </button>
+            </div>
               <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white dark:bg-[#201c1c]">
-                <p className='pb-8 font-bold text-lg'>Register yourself</p>
+                <p className='pb-8 font-bold text-lg'>Register yourself, keep a secret safe</p>
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                     <LabelInputContainer>
                         <Label htmlFor="firstname">First name</Label>
@@ -214,7 +236,7 @@ export default function Register() {
                   </LabelInputContainer>
 
                     <LabelInputContainer className="mb-4">
-                        <Label htmlFor="something">Something about you</Label>
+                        <Label htmlFor="something">Tell me a secret of yours</Label>
                         <Input id="something" placeholder="Corinthians" type="something" onChange={(e) => handleInputChange(e, setSomething)} />
                     </LabelInputContainer>
                     
@@ -225,7 +247,7 @@ export default function Register() {
                     
                     <div className='relative md:min-h-[1000px] mt-4'>
                         <div className={`${ledStates[ledState]} p-2 absolute rounded-[500px]`}>
-                            <video className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
+                            <video style={{"transform": "scaleX(-1)"}} className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
                         </div>
                     </div>
                   
