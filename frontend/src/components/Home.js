@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 
+
 function Home() {
 
   const [isDark, setIsDark] = React.useState(false);

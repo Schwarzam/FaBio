@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .helpers import turn_left_detection, turn_right_detection, verify_number_faces
 
 from django.contrib.auth import get_user_model
 
@@ -64,3 +65,34 @@ def login(request):
         'refresh': str(refresh),
         'access': str(refresh.access_token),
     })
+    
+
+@api_view(['POST'])
+def test_side_face(request):
+    
+    print(request.data)
+    
+    email = request.data.get('email')
+    image_mem = request.data.get('imageUpload')
+    direction = request.data.get('direction')
+    
+    # get numpy array from image
+    image = Image.open(io.BytesIO(image_mem.read()))
+    image = np.array(image)
+    
+    if direction == 'left':
+        response = turn_left_detection(image)
+        return Response({'correct': response})
+    elif direction == 'right':
+        response = turn_right_detection(image)
+        return Response({'correct': response})
+    elif direction == 'straight':
+        ## TODO: Add straight face detection
+        
+        n = verify_number_faces(image)
+        if n == 1:
+            return Response({'correct': True})
+        else:
+            return Response({'message': "Make sure your face is in the center of the frame and is not obstructed by anything."})
+    
+    return Response({'message': 'Invalid direction. Please provide a valid direction: left, right, or straight.'})
