@@ -21,7 +21,7 @@ TA: 32456913 <br>
 leohaga@hotmail.com
 
 
-### Running
+### Installing/Running
 
 ```bash
 docker-compose build

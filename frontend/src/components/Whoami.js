@@ -64,8 +64,7 @@ export default function Register() {
         }
 
         clear_elements();
-        toast("Fill the email field to login", { type: 'info' })
-
+        
         window.addEventListener('resize', updateCanvasSize);
         updateCanvasSize();
 
