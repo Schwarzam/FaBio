@@ -8,6 +8,8 @@ import { Input } from "./ui/input";
 
 import { useNavigate } from "react-router-dom";
 
+import { clear_elements, set_elements } from './helpers/helpers';
+
 export default function Register() {
     const videoRef = useRef(null);
     const [canvasSize, setCanvasSize] = useState({ width: 360, height: 360 });
@@ -65,6 +67,8 @@ export default function Register() {
         return () => {
             window.removeEventListener('resize', updateCanvasSize);
         };
+
+        clear_elements();
     }, []);
 
     const handleShowVideoButton = () => {
@@ -95,6 +99,13 @@ export default function Register() {
                     post('/api/login/', formData)
                         .then(response => {
                             if (response['message'][0]) {
+                                set_elements(
+                                    response['first_name'],
+                                    response['last_name'],
+                                    response['email'],
+                                    response['something'],
+                                )
+
                                 navigate('/user')
                             }
                         })
@@ -196,8 +207,9 @@ export default function Register() {
               }}
               className="relative flex flex-col gap-4 items-center justify-center px-4 bg-gray-100 dark:bg-[#201c1c]"
           >
+            
               <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white bg-white dark:bg-black">
-
+              <p className='pb-8 font-bold text-lg'>Login</p>
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
                       <Input id="email" placeholder="projectmayhem@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />

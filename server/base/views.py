@@ -18,8 +18,6 @@ import secrets
 
 import face_recognition
 
-
-
 tokens = []
 
 @api_view(['POST'])
@@ -28,6 +26,7 @@ def register(request):
     
     first_name = request.data.get('first_name')
     last_name = request.data.get('last_name')
+    something = request.data.get('something')
     email = request.data.get('email')
     image_mem = request.data.get('imageUpload')
     token = request.data.get('token')
@@ -47,7 +46,7 @@ def register(request):
     
     face_encoding = face_recognition.face_encodings(image)[0]
     
-    user = MyUser.objects.create(email=email, first_name=first_name, last_name=last_name)
+    user = MyUser.objects.create(email=email, first_name=first_name, last_name=last_name, something=something)
     user.face_encoding_array = face_encoding.tobytes()
     user.save()
     
@@ -68,15 +67,15 @@ def login(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
+    print(image)
     encoding = face_recognition.face_encodings(image)[0]
     
     # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
     face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
     
     result = face_recognition.compare_faces([face_encoding], encoding)
-    print(result)
     
-    return Response({'message': result})
+    return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
     
 
 @api_view(['POST'])

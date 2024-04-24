@@ -197,6 +197,7 @@ export default function Register() {
               className="relative flex flex-col gap-4 items-center justify-center px-4 bg-gray-100 dark:bg-[#201c1c]"
           >
               <div className="max-w-md my-10 rounded-lg w-full md:rounded-2xl p-4 md:p-8 shadow-input text-black dark:text-white dark:bg-[#201c1c]">
+                <p className='pb-8 font-bold text-lg'>Register yourself</p>
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                     <LabelInputContainer>
                         <Label htmlFor="firstname">First name</Label>
