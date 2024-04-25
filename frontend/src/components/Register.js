@@ -91,7 +91,7 @@ export default function Register() {
         canvas.toBlob(blob => 
             setImageBlob1(
                 blob
-            ))
+            ), 'image/jpeg', 0.95)
     }
 
     const register = async () => {
@@ -110,13 +110,15 @@ export default function Register() {
 
         const buffer2 = await imageBlob1.arrayBuffer();
 
+        console.log(buffer2)
         setLedState(1);
         canvas.toBlob(blob => {
             if (blob) {
                 blob.arrayBuffer().then(buffer => {
+                    console.log(buffer)
                     const formData = new FormData();
-                    formData.append('imageUpload', new Blob([buffer], { type: 'image/png' }), 'image.png');
-                    formData.append('imageUpload2', new Blob([buffer2], { type: 'image/png' }), 'image2.png')
+                    formData.append('imageUpload', new Blob([buffer], { type: 'image/jpg' }), 'image.jpg');
+                    formData.append('imageUpload2', new Blob([buffer2], { type: 'image/jpg' }), 'image2.jpg')
                     formData.append('email', email);
                     formData.append('first_name', firstName);
                     formData.append('last_name', lastName);
@@ -145,7 +147,7 @@ export default function Register() {
                         });
                 });
             }
-        }, 'image/jpeg');
+        }, 'image/jpeg', 0.95);
     };
 
     const startCaptureInterval = () => {
@@ -236,7 +238,7 @@ export default function Register() {
                         });
                 });
             }
-        }, 'image/jpeg');
+        }, 'image/jpeg', 0.95);
     };
     return (
       <div>

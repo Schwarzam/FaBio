@@ -48,12 +48,8 @@ def register(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    # HACK: This is a bug
     image2 = Image.open(io.BytesIO(image_mem2.read()))
-    output = io.BytesIO()
-    image2.save(output, 'PNG')
-    output.seek(0)
-    image2 = face_recognition.load_image_file(output)
+    image2 = np.array(image)
 
     face_encoding = face_recognition.face_encodings(image)
     try:
@@ -91,12 +87,8 @@ def login(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    # HACK: This is a bug
     image2 = Image.open(io.BytesIO(image_mem2.read()))
-    output = io.BytesIO()
-    image2.save(output, 'PNG')
-    output.seek(0)
-    image2 = face_recognition.load_image_file(output)
+    image2 = np.array(image)
     
     try:
         encoding = face_recognition.face_encodings(image)[0]
@@ -136,12 +128,8 @@ def whoami(request):
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
-    # HACK: This is a bug
     image2 = Image.open(io.BytesIO(image_mem2.read()))
-    output = io.BytesIO()
-    image2.save(output, 'PNG')
-    output.seek(0)
-    image2 = face_recognition.load_image_file(output)
+    image2 = np.array(image)
     
     try:
         encoding = face_recognition.face_encodings(image)[0]
@@ -212,3 +200,8 @@ def test_side_face(request):
             return Response({'message': "Make sure your face is in the center of the frame and is not obstructed by anything."})
     
     return Response({'message': 'Invalid direction. Please provide a valid direction: left, right, or straight.'})
+
+@api_view(["GET"])
+def get_number_users(request):
+    n_users = len(MyUser.objects.all())
+    return Response({"nusers":n_users}) 

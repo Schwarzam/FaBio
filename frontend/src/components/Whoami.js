@@ -141,7 +141,7 @@ export default function Register() {
                         });
                 });
             }
-        }, 'image/jpeg');
+        }, 'image/jpeg', 0.95);
     };
 
     const startCaptureInterval = (interval = 1000) => {
@@ -207,7 +207,7 @@ export default function Register() {
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
         console.log("Capturing blob1")
-        canvas.toBlob(blob => setImageBlob1(blob))
+        canvas.toBlob(blob => setImageBlob1(blob), 'image/jpeg', 0.95)
     }
 
     const captureFrame = async () => {
@@ -243,7 +243,7 @@ export default function Register() {
                                 if (direction === "straight"){
                                     captureImageBlob();
                                 }
-                                
+
                                 const nextStep = currentStepRef.current + 1;
                                 setCurrentStep(nextStep);
                             }
@@ -255,7 +255,7 @@ export default function Register() {
                         });
                 });
             }
-        }, 'image/jpeg');
+        }, 'image/jpeg', 0.95);
     };
     return (
       <div>
