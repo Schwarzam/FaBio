@@ -22,7 +22,7 @@ export default function Register() {
      
     const [regToken, setRegToken] = useState(null);
 
-    const steps = ['straight', 'left', 'right', 'take'];
+    const steps = ['straight', 'left', 'right', 'straight', 'take'];
     const steps_messages = [
       'Please look straight and center your face.', 
       'Please look to the right.', 
@@ -67,14 +67,20 @@ export default function Register() {
         clear_elements();
         
         window.addEventListener('resize', updateCanvasSize);
-        updateCanvasSize();
-
-        startCaptureInterval();
+        updateCanvasSize();        
 
         return () => {
             window.removeEventListener('resize', updateCanvasSize);
         };
         
+    }, []);
+
+    useEffect(() => {
+        // Timeout to allow video to load
+        setTimeout(() => {
+            setShowVideo(true);
+            startCaptureInterval();
+        }, 2000);
     }, []);
 
     const handleShowVideoButton = () => {
@@ -144,7 +150,9 @@ export default function Register() {
         }, 'image/jpeg', 0.95);
     };
 
-    const startCaptureInterval = (interval = 1000) => {
+    const startCaptureInterval = (interval = 2000) => {
+        console.log("Starting capture interval")
+        if (captureFrameInterval !== null) return;
         setCaptureFrameInterval(setInterval(captureFrame, interval));
     }
 
@@ -152,16 +160,6 @@ export default function Register() {
         clearInterval(captureFrameInterval);
         setCaptureFrameInterval(null);
     }
-
-    const handleInputChange = (e, setInput) => {
-        setInput(e.target.value);
-        setCurrentStep(0);
-    
-        if (captureFrameInterval === null){
-            startCaptureInterval();
-        }
-        
-    }; 
 
     useEffect(() => {
         currentStepRef.current = currentStep; // Keep ref up to date

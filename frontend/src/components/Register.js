@@ -29,7 +29,7 @@ export default function Register() {
     const navigate = useNavigate();
 
     // I want to make the steps random, but take should always be the last step
-    const steps = ['straight', 'left', 'right', 'take'];
+    const steps = ['straight', 'left', 'right', 'straight', 'take'];
 
     const steps_messages = [
       'Please look straight and center your face.', 
@@ -152,8 +152,9 @@ export default function Register() {
         }, 'image/jpeg', 0.95);
     };
 
-    const startCaptureInterval = () => {
-        setCaptureFrameInterval(setInterval(captureFrame, 1000));
+    const startCaptureInterval = (interval = 1500) => {
+        if (captureFrameInterval !== null) return;
+        setCaptureFrameInterval(setInterval(captureFrame, interval));
     }
 
     const stopCaptureInterval = () => {
@@ -192,9 +193,15 @@ export default function Register() {
         }, 2000);
     }
 
+    const handlePaste = (event) => {
+        event.preventDefault(); // Prevent the default paste action
+        // Optionally, you can alert the user that paste is disabled
+        alert("Pasting text is not allowed.");
+    }
+
     const captureFrame = async () => {
         if (!videoRef.current) return;
-    
+
         const canvas = document.createElement('canvas');
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
@@ -266,21 +273,21 @@ export default function Register() {
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                     <LabelInputContainer>
                         <Label htmlFor="firstname">First name</Label>
-                        <Input id="firstname" placeholder="name" type="text" onChange={(e) => handleInputChange(e, setFirstName)} />
+                        <Input autoComplete='nope' onPaste={(e) => handlePaste(e)} id="firstname" placeholder="name" type="text" onChange={(e) => handleInputChange(e, setFirstName)} />
                     </LabelInputContainer>
                     <LabelInputContainer>
                         <Label htmlFor="lastname">Last name</Label>
-                        <Input id="lastname" placeholder="surname" type="text" onChange={(e) => handleInputChange(e, setLastName)} />
+                        <Input autoComplete='nope' onPaste={(e) => handlePaste(e)} id="lastname" placeholder="surname" type="text" onChange={(e) => handleInputChange(e, setLastName)} />
                     </LabelInputContainer>
                     </div>
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" placeholder="projet@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
+                      <Input autoComplete='nope' onPaste={(e) => handlePaste(e)} id="email" placeholder="projet@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
                   </LabelInputContainer>
 
                     <LabelInputContainer className="mb-4">
                         <Label htmlFor="something">Tell me a secret of yours</Label>
-                        <Input id="something" placeholder="Corinthians" type="something" onChange={(e) => handleInputChange(e, setSomething)} />
+                        <Input autoComplete='nope' onPaste={(e) => handlePaste(e)} id="something" placeholder="Corinthians" type="something" onChange={(e) => handleInputChange(e, setSomething)} />
                     </LabelInputContainer>
                     
                     <div className={`relative md:min-h-[1000px] mt-4 ${videoHidden ? 'hidden' : ''}`}>
@@ -289,6 +296,7 @@ export default function Register() {
                         </p>
                         <div className={`${ledStates[ledState]} p-2 absolute rounded-[500px]`}>
                             <video style={{"transform": "scaleX(-1)"}} className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
+                            <div className="white-circle"></div> {/* White circle overlay */}
                         </div>
                     </div>
                   

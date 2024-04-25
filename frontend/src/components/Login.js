@@ -23,7 +23,7 @@ export default function Register() {
      
     const [regToken, setRegToken] = useState(null);
 
-    const steps = ['straight', 'left', 'right', 'take'];
+    const steps = ['straight', 'left', 'right', 'straight', 'take'];
     const steps_messages = [
       'Please look straight and center your face.', 
       'Please look to the right.', 
@@ -163,7 +163,8 @@ export default function Register() {
         }, 'image/jpeg', 0.95);
     };
 
-    const startCaptureInterval = (interval = 1000) => {
+    const startCaptureInterval = (interval = 1500) => {
+        if (captureFrameInterval !== null) return;
         setCaptureFrameInterval(setInterval(captureFrame, interval));
     }
 
@@ -214,6 +215,12 @@ export default function Register() {
         }
     }
 
+    const handlePaste = (event) => {
+        event.preventDefault(); // Prevent the default paste action
+        // Optionally, you can alert the user that paste is disabled
+        alert("Pasting text is not allowed.");
+    }
+
     const captureFrame = async () => {
         if (!videoRef.current) return;
     
@@ -239,7 +246,6 @@ export default function Register() {
 
                     post('/api/test_side_face/', formData)
                         .then(response => {
-                            // Move to the next step based on current direction
                             if (steps[currentStepRef.current] === 'take' && response['correct']) {
                                 setRegToken(response['token']);
                             }
@@ -286,7 +292,7 @@ export default function Register() {
               <p className='pb-8 font-bold text-lg'>Login</p>
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" placeholder="project@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
+                      <Input id="email" autoComplete='nope' onPaste={(e) => handlePaste(e)} placeholder="project@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
                   </LabelInputContainer>
 
                     <div className={`relative md:min-h-[1000px] mt-4 ${videoHidden ? 'hidden' : ''}`}>
@@ -296,7 +302,10 @@ export default function Register() {
                         <div className={`${ledStates[ledState]} p-2 absolute rounded-[500px]`}>
                             <video style={{"transform": "scaleX(-1)"}} className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
                         </div>
+                        
                     </div>
+
+                    
                   
               </div>
           </motion.div>
