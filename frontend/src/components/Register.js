@@ -24,6 +24,7 @@ export default function Register() {
     const [regToken, setRegToken] = useState(null);
 
     const [imageBlob1, setImageBlob1] = useState(null)
+    const [videoHidden, setVideoHidden] = useState(true)
 
     const navigate = useNavigate();
 
@@ -160,10 +161,11 @@ export default function Register() {
         setInput(e.target.value);
         setCurrentStep(0);
 
-        if (firstName && lastName && email) {
+        if (firstName && lastName && email && something) {
             if (captureFrameInterval === null){
                 startCaptureInterval();
             }
+            setVideoHidden(false)
         }
     }; 
 
@@ -277,12 +279,10 @@ export default function Register() {
                         <Input id="something" placeholder="Corinthians" type="something" onChange={(e) => handleInputChange(e, setSomething)} />
                     </LabelInputContainer>
                     
-                    
-                    <p className={`bg-gray-300 text-center p-4 border rounded-2xl mt-10 text-black dark:text-black border-neutral-200 dark:border-gray-200`}>
-                        {steps_messages[currentStep]}
-                    </p>
-                    
-                    <div className='relative md:min-h-[1000px] mt-4'>
+                    <div className={`relative md:min-h-[1000px] mt-4 ${videoHidden ? 'hidden' : ''}`}>
+                        <p className={`bg-gray-300 text-center p-4 border rounded-2xl mt-10 text-black dark:text-black border-neutral-200 dark:border-gray-200`}>
+                            {steps_messages[currentStep]}
+                        </p>
                         <div className={`${ledStates[ledState]} p-2 absolute rounded-[500px]`}>
                             <video style={{"transform": "scaleX(-1)"}} className='rounded-[500px]' ref={videoRef} preload={true} autoPlay playsInline muted />
                         </div>
