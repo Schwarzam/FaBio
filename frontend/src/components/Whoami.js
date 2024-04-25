@@ -88,8 +88,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 512;
-        canvas.height = 512 / aspectRatio;
+        canvas.width = 250;
+        canvas.height = 250 / aspectRatio;
 
         const ctx = canvas.getContext('2d');
 
@@ -201,8 +201,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 512;
-        canvas.height = 512 / aspectRatio;
+        canvas.width = 250;
+        canvas.height = 250 / aspectRatio;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 

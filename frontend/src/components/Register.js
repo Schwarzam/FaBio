@@ -84,8 +84,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 512;
-        canvas.height = 512 / aspectRatio;
+        canvas.width = 250;
+        canvas.height = 250 / aspectRatio;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
@@ -104,8 +104,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 512;
-        canvas.height = 512 / aspectRatio;
+        canvas.width = 250;
+        canvas.height = 250 / aspectRatio;
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
@@ -266,16 +266,16 @@ export default function Register() {
                 <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-4">
                     <LabelInputContainer>
                         <Label htmlFor="firstname">First name</Label>
-                        <Input id="firstname" placeholder="Vincas" type="text" onChange={(e) => handleInputChange(e, setFirstName)} />
+                        <Input id="firstname" placeholder="name" type="text" onChange={(e) => handleInputChange(e, setFirstName)} />
                     </LabelInputContainer>
                     <LabelInputContainer>
                         <Label htmlFor="lastname">Last name</Label>
-                        <Input id="lastname" placeholder="Oliveira" type="text" onChange={(e) => handleInputChange(e, setLastName)} />
+                        <Input id="lastname" placeholder="surname" type="text" onChange={(e) => handleInputChange(e, setLastName)} />
                     </LabelInputContainer>
                     </div>
                   <LabelInputContainer className="mb-4">
                       <Label htmlFor="email">Email Address</Label>
-                      <Input id="email" placeholder="projectmayhem@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
+                      <Input id="email" placeholder="projet@mack.com" type="email" onChange={(e) => handleInputChange(e, setEmail)} />
                   </LabelInputContainer>
 
                     <LabelInputContainer className="mb-4">
