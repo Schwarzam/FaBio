@@ -7,6 +7,7 @@ class MyUser(models.Model):
     last_name = models.CharField(max_length=50)
     something = models.CharField(max_length=200)
     face_encoding_array = models.BinaryField()
+    face_encoding_array2 = models.BinaryField(null=True)
     
     def __str__(self):
         return self.email

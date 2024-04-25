@@ -10,20 +10,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Tokens, MyUser
 from .helpers import turn_left_detection, turn_right_detection, verify_number_faces
 
-from django.contrib.auth import get_user_model
-
 import numpy as np
 import io
 import secrets
 
 import face_recognition
 
+THRESHOLD = 3 # 3 out of 4 corrects
+
 tokens = []
 
 @api_view(['POST'])
 def register(request):
-    Users = get_user_model()
-    
     first_name = request.data.get('first_name')
     last_name = request.data.get('last_name')
     something = request.data.get('something')
@@ -31,6 +29,8 @@ def register(request):
     email = email.lower()
     
     image_mem = request.data.get('imageUpload')
+    image_mem2 = request.data.get('imageUpload2')
+    
     token = request.data.get('token')
     
     token = Tokens.objects.filter(token=token).first()
@@ -40,19 +40,36 @@ def register(request):
         ## Remove token from tokens
         token.delete()
     
-    if Users.objects.filter(email=email).exists():
+    user = MyUser.objects.filter(email=email).first()
+    print(user)
+    if not MyUser.objects.filter(email=email).first() is None:
         return Response({'error': 'Email is already taken'}, status=status.HTTP_409_CONFLICT)
     
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
+    # HACK: This is a bug
+    image2 = Image.open(io.BytesIO(image_mem2.read()))
+    output = io.BytesIO()
+    image2.save(output, 'PNG')
+    output.seek(0)
+    image2 = face_recognition.load_image_file(output)
+
+    face_encoding = face_recognition.face_encodings(image)
     try:
         face_encoding = face_recognition.face_encodings(image)[0]
     except:
-        return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'No face detected in the image 1', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        face_encoding2 = face_recognition.face_encodings(image2)[0]
+    except Exception as e:
+        print(e)
+        return Response({'error': 'No face detected in the image 2', 'redo': 'straight'}, status=status.HTTP_400_BAD_REQUEST)
     
     user = MyUser.objects.create(email=email, first_name=first_name, last_name=last_name, something=something)
     user.face_encoding_array = face_encoding.tobytes()
+    user.face_encoding_array2 = face_encoding2.tobytes()
     user.save()
     
     return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
@@ -68,21 +85,43 @@ def login(request):
         return Response({'error': 'Email is not registered'}, status=status.HTTP_401_UNAUTHORIZED)
     
     image_mem = request.data.get('imageUpload')
+    image_mem2 = request.data.get('imageUpload2')
     
     # Open the image file and convert it to a numpy array
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
+    # HACK: This is a bug
+    image2 = Image.open(io.BytesIO(image_mem2.read()))
+    output = io.BytesIO()
+    image2.save(output, 'PNG')
+    output.seek(0)
+    image2 = face_recognition.load_image_file(output)
+    
     try:
         encoding = face_recognition.face_encodings(image)[0]
     except:
-        return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
-        
+        return Response({'error': 'No face detected in the image1', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        encoding2 = face_recognition.face_encodings(image2)[0]
+    except:
+        return Response({'error': 'No face detected in the image2', 'redo': 'straight'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
     # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
     face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
+    face_encoding2 = np.frombuffer(user.face_encoding_array2, dtype=np.float64)
     
-    result = face_recognition.compare_faces([face_encoding], encoding)
-    if not result[0]:
+    result = face_recognition.compare_faces([face_encoding, face_encoding2], encoding)
+    result2 = face_recognition.compare_faces([face_encoding, face_encoding2], encoding2)
+    
+    count = 0
+    for res in result + result2:
+        if res:
+            count += 1
+    
+    if count <= THRESHOLD:
         return Response({'error': 'Face does not match'}, status=status.HTTP_401_UNAUTHORIZED)
     
     return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
@@ -91,29 +130,49 @@ def login(request):
 def whoami(request):
     
     image_mem = request.data.get('imageUpload')
+    image_mem2 = request.data.get('imageUpload2')
     
     # Open the image file and convert it to a numpy array
     image = Image.open(io.BytesIO(image_mem.read()))
     image = np.array(image)
     
+    # HACK: This is a bug
+    image2 = Image.open(io.BytesIO(image_mem2.read()))
+    output = io.BytesIO()
+    image2.save(output, 'PNG')
+    output.seek(0)
+    image2 = face_recognition.load_image_file(output)
+    
     try:
         encoding = face_recognition.face_encodings(image)[0]
     except:
         return Response({'error': 'No face detected in the image', 'redo': 'take'}, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+    try:
+        encoding2 = face_recognition.face_encodings(image2)[0]
+    except:
+        return Response({'error': 'No face detected in the image2', 'redo': 'straight'}, status=status.HTTP_400_BAD_REQUEST)
+    
             
     users = MyUser.objects.filter().all()
     for user in users:
         # Transform face_encoding_bytes <memory at 0xffff6ab98100> to numpy array
         face_encoding = np.frombuffer(user.face_encoding_array, dtype=np.float64)
+        face_encoding2 = np.frombuffer(user.face_encoding_array2, dtype=np.float64)
         
-        if len(face_encoding) == 0:
-            continue
+        result = face_recognition.compare_faces([face_encoding, face_encoding2], encoding)
+        result2 = face_recognition.compare_faces([face_encoding, face_encoding2], encoding2)
         
-        result = face_recognition.compare_faces([face_encoding], encoding)
-        if result[0]:        
-            return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
+        count = 0
+        for res in result + result2:
+            if res:
+                count += 1
     
+        if count <= THRESHOLD:
+            continue 
+        else:
+            return Response({'message': result, "first_name": user.first_name, "last_name": user.last_name, "email": user.email, "something": user.something})
+        
     return Response({'error': 'Face does not match any on database'}, status=status.HTTP_401_UNAUTHORIZED)
     
 

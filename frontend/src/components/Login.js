@@ -33,6 +33,8 @@ export default function Register() {
     const [currentStep, setCurrentStep] = useState(0);
     const currentStepRef = useRef(currentStep);
 
+    const [imageBlob1, setImageBlob1] = useState(null);
+
     const navigate = useNavigate();
 
     const ledStates = [
@@ -72,9 +74,23 @@ export default function Register() {
         return () => {
             window.removeEventListener('resize', updateCanvasSize);
         };
-
-        
     }, []);
+
+    const captureImageBlob = () => {
+        if (imageBlob1) {return};
+
+        const canvas = document.createElement('canvas');
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
+        canvas.width = 1024;
+        canvas.height = 1024 / aspectRatio;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        console.log("Capturing blob1")
+        canvas.toBlob(blob => setImageBlob1(blob))
+    }
 
     const handleShowVideoButton = () => {
         setShowVideo(true);
@@ -84,12 +100,16 @@ export default function Register() {
         if (!videoRef.current) return;
 
         const canvas = document.createElement('canvas');
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
         canvas.width = 1024;
-        canvas.height = 1024;
+        canvas.height = 1024 / aspectRatio;
 
         const ctx = canvas.getContext('2d');
 
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const buffer2 = await imageBlob1.arrayBuffer();
 
         setLedState(1);
         canvas.toBlob(blob => {
@@ -98,9 +118,11 @@ export default function Register() {
                     console.log(localStorage.getItem('regtoken'))
                     var formData = new FormData();
                     formData.append('imageUpload', new Blob([buffer], { type: 'image/jpeg' }), 'image.jpg');
+                    formData.append('imageUpload2', new Blob([buffer2], { type: 'image/jpeg' }), 'image2.jpg')
                     formData.append('email', email);
                     formData.append('token', regToken);
 
+                    
                     post('/api/login/', formData)
                         .then(response => {
                             if (response['error']) {
@@ -167,7 +189,6 @@ export default function Register() {
             stopCaptureInterval();
             login();
         }
-        
     }, [currentStep]);
 
     let timeoutID = null;
@@ -194,8 +215,12 @@ export default function Register() {
         if (!videoRef.current) return;
     
         const canvas = document.createElement('canvas');
+
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
         canvas.width = canvasSize.width;
-        canvas.height = canvasSize.height;
+        canvas.height = canvasSize.width / aspectRatio;
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
@@ -207,7 +232,8 @@ export default function Register() {
                     formData.append('imageUpload', new Blob([buffer], { type: 'image/jpeg' }), 'image.jpg');
                     formData.append('email', email);
                     formData.append('direction', steps[currentStepRef.current]);
-                    
+                    const direction = steps[currentStepRef.current]
+
                     post('/api/test_side_face/', formData)
                         .then(response => {
                             // Move to the next step based on current direction
@@ -216,6 +242,10 @@ export default function Register() {
                             }
 
                             if (response['correct']) {
+                                if (direction === "straight"){
+                                    captureImageBlob();
+                                }
+
                                 const nextStep = currentStepRef.current + 1;
                                 setCurrentStep(nextStep);
                             }

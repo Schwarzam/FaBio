@@ -23,6 +23,8 @@ export default function Register() {
      
     const [regToken, setRegToken] = useState(null);
 
+    const [imageBlob1, setImageBlob1] = useState(null)
+
     const navigate = useNavigate();
 
     const steps = ['straight', 'left', 'right', 'take'];
@@ -72,24 +74,48 @@ export default function Register() {
         };
     }, []);
 
+    const captureImageBlob = async () => {
+        if (imageBlob1) {return};
+
+        const canvas = document.createElement('canvas');
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
+        canvas.width = 1024;
+        canvas.height = 1024 / aspectRatio;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        console.log("Capturing blob1")
+        canvas.toBlob(blob => 
+            setImageBlob1(
+                blob
+            ))
+    }
+
     const register = async () => {
         if (!videoRef.current) return;
 
         const canvas = document.createElement('canvas');
+
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
         canvas.width = 1024;
-        canvas.height = 1024;
+        canvas.height = 1024 / aspectRatio;
 
         const ctx = canvas.getContext('2d');
-
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        const buffer2 = await imageBlob1.arrayBuffer();
 
         setLedState(1);
         canvas.toBlob(blob => {
             if (blob) {
                 blob.arrayBuffer().then(buffer => {
-                    console.log(localStorage.getItem('regtoken'))
                     const formData = new FormData();
-                    formData.append('imageUpload', new Blob([buffer], { type: 'image/jpeg' }), 'image.jpg');
+                    formData.append('imageUpload', new Blob([buffer], { type: 'image/png' }), 'image.png');
+                    formData.append('imageUpload2', new Blob([buffer2], { type: 'image/png' }), 'image2.png')
                     formData.append('email', email);
                     formData.append('first_name', firstName);
                     formData.append('last_name', lastName);
@@ -164,8 +190,11 @@ export default function Register() {
         if (!videoRef.current) return;
     
         const canvas = document.createElement('canvas');
+        const videoElement = videoRef.current;
+        const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+
         canvas.width = canvasSize.width;
-        canvas.height = canvasSize.height;
+        canvas.height = canvasSize.width / aspectRatio;
 
         const ctx = canvas.getContext('2d');
 
@@ -177,6 +206,8 @@ export default function Register() {
                     var formData = new FormData();
                     formData.append('imageUpload', new Blob([buffer], { type: 'image/jpeg' }), 'image.jpg');
                     formData.append('email', email);
+
+                    const direction = steps[currentStepRef.current]
                     formData.append('direction', steps[currentStepRef.current]);
                     
                     post('/api/test_side_face/', formData)
@@ -187,8 +218,14 @@ export default function Register() {
                             }
 
                             if (response['correct']) {
+                                if (direction === "straight"){
+                                    captureImageBlob();
+                                }
+
                                 const nextStep = currentStepRef.current + 1;
                                 setCurrentStep(nextStep);
+
+                                
                             }
 
                         })
