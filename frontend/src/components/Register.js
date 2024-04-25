@@ -28,7 +28,9 @@ export default function Register() {
 
     const navigate = useNavigate();
 
+    // I want to make the steps random, but take should always be the last step
     const steps = ['straight', 'left', 'right', 'take'];
+
     const steps_messages = [
       'Please look straight and center your face.', 
       'Please look to the right.', 
@@ -82,8 +84,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 1024;
-        canvas.height = 1024 / aspectRatio;
+        canvas.width = 512;
+        canvas.height = 512 / aspectRatio;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
@@ -102,8 +104,8 @@ export default function Register() {
         const videoElement = videoRef.current;
         const aspectRatio = videoElement.videoWidth / videoElement.videoHeight;
 
-        canvas.width = 1024;
-        canvas.height = 1024 / aspectRatio;
+        canvas.width = 512;
+        canvas.height = 512 / aspectRatio;
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);

@@ -22,6 +22,21 @@ tokens = []
 
 @api_view(['POST'])
 def register(request):
+    """
+    Register a new user.
+
+    Args:
+        request (Request): The HTTP request object.
+
+    Returns:
+        Response: The HTTP response object.
+
+    Raises:
+        HTTP_401_UNAUTHORIZED: If the token is invalid.
+        HTTP_409_CONFLICT: If the email is already taken.
+        HTTP_400_BAD_REQUEST: If no face is detected in the images.
+
+    """
     first_name = request.data.get('first_name')
     last_name = request.data.get('last_name')
     something = request.data.get('something')
@@ -70,8 +85,23 @@ def register(request):
     
     return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
     
+
+
 @api_view(['POST'])
 def login(request):
+    """
+    Authenticate user based on face recognition.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The HTTP response object.
+
+    Raises:
+        ValueError: If the request data is invalid.
+
+    """
     email = request.data.get('email')
     email = email.lower()
     
@@ -120,6 +150,7 @@ def login(request):
 
 @api_view(['POST'])
 def whoami(request):
+    """Test a image agaist all users in the database."""
     
     image_mem = request.data.get('imageUpload')
     image_mem2 = request.data.get('imageUpload2')
