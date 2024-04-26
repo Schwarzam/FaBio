@@ -1,25 +1,10 @@
 # FaBio
 
-Gustavo Bernard Schwarz - Ciência Computação Noturno <br>
-TIA: 32141157 <br>
-gustavo.b.schwarz@gmail.com
+### Facial Biometrics
 
-Vincenzo Alberice - Ciência Computação Noturno <br>
-TIA: 32135661 <br>
-albericevincenzo@gmail.com
+This work was written by Gustavo Schwarz and Vincenzo Alberice in collaboration with Laura Gomes Rodrigues, Nikoly Pontes Pinheiro and Leonardo Nagase Haga.
 
-Laura Gomes Rodrigues - Ciências Biológicas matutino <br>
-TIA: 42315141 <br>
-palauragomes@gmail.com
-
-Nikoly Pontes Pinheiro - Ciências Biológicas matutino <br>
-TIA: 32399448 <br>
-chewbaccanik@gmail.com
-
-Leonardo Nagase Haga - Engenharia Produção Vespertino <br>
-TA: 32456913 <br>
-leohaga@hotmail.com
-
+Facial Biometrics (**FaBio**) is a real time `life proof` and `facial authentication` in a web server.
 
 ### Installing/Running
 
