@@ -24,6 +24,7 @@ export default function Register() {
     const [regToken, setRegToken] = useState(null);
 
     const [imageBlob1, setImageBlob1] = useState(null)
+
     const [videoHidden, setVideoHidden] = useState(true)
 
     const navigate = useNavigate();
@@ -89,7 +90,6 @@ export default function Register() {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-        console.log("Capturing blob1")
         canvas.toBlob(blob => 
             setImageBlob1(
                 blob
