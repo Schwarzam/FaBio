@@ -6,6 +6,8 @@ This work was written by Gustavo Schwarz and Vincenzo Alberice in collaboration 
 
 Facial Biometrics (**FaBio**) is a real time `life proof` and `facial authentication` in a web server.
 
+![home](https://github.com/Schwarzam/FaBio/blob/main/gh_images/Screenshot%202024-04-26%20at%2015.20.02.png)
+
 ### Installing/Running
 
 ```bash
@@ -106,6 +108,8 @@ We use `face_recognition.face_encodings()` method to generate a 128-dimensional 
 
 This approach ensures secure access control by linking biometric data with user accounts. It's important to mention that it's made a verification to check if the face is pointing to the right direction before submiting image to login or register.
 
+---
+![register](https://github.com/Schwarzam/FaBio/blob/main/gh_images/Screenshot%202024-04-26%20at%2015.20.50.png)
 ---
 
 ### A quick guide to those who don't are familiar
